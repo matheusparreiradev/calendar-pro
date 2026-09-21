@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { CalendarEvent } from '@/types/calendar';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vlqntlfxcofpeavdffrm.supabase.co';
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vlqntlfxcofpeavdffrm.supabase.co';
 const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.NEXT_PUBLIC_CALENDARDBSUPABASE_ANON_KEY ||
-  '';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscW50bGZ4Y29mcGVhdmRmZnJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5ODk3NTEsImV4cCI6MjEwNTU2NTc1MX0.YitIicyJHvipkx0w4YUteN66t1k2IYfjq3e8ScY2Nmo';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
