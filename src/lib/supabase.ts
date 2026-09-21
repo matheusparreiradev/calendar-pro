@@ -103,31 +103,49 @@ export async function fetchEvents(): Promise<{ events: CalendarEvent[]; isFromSu
   }
 }
 
-export async function createEvent(event: Omit<CalendarEvent, 'id' | 'created_at'>): Promise<{ data: CalendarEvent | null; error: Error | null; isLocal: boolean }> {
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+export async function createEvent(event: Omit<CalendarEvent, 'id' | 'created_at'> & { id?: string }): Promise<{ data: CalendarEvent | null; error: Error | null; isLocal: boolean }> {
+  const eventId = event.id || generateUUID();
+  const payload = {
+    ...event,
+    id: eventId,
+  };
+
   try {
     const { data, error } = await supabase
       .from('events')
-      .insert([event])
+      .insert([payload])
       .select()
       .single();
 
     if (error) {
       if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
         const localEvent: CalendarEvent = {
-          ...event,
+          ...payload,
           id: 'local-' + Date.now(),
           created_at: new Date().toISOString(),
         };
         saveLocalEvent(localEvent);
         return { data: localEvent, error: null, isLocal: true };
       }
+      console.error('Supabase createEvent error:', error);
       return { data: null, error: new Error(error.message), isLocal: false };
     }
 
     return { data: data as CalendarEvent, error: null, isLocal: false };
   } catch {
     const localEvent: CalendarEvent = {
-      ...event,
+      ...payload,
       id: 'local-' + Date.now(),
       created_at: new Date().toISOString(),
     };
